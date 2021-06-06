@@ -41,11 +41,7 @@ find_library( # Sets the name of the path variable.
 
 target_link_libraries( # Specifies the target library.
         native-lib
-        opencl_lib
-        cutils_lib
-        cpp_lib
-        base_lib
-        GLESv3
+        vulkan_lib
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib} android)
@@ -70,4 +66,9 @@ add_library(base_lib STATIC IMPORTED)
 set_target_properties(base_lib PROPERTIES
         IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/jniLibs/arm64-v8a/libbase.so)
+
+add_library(vulkan_lib STATIC IMPORTED)
+set_target_properties(vulkan_lib PROPERTIES
+        IMPORTED_LOCATION
+        ${CMAKE_SOURCE_DIR}/jniLibs/arm64-v8a/libvulkan.so)
 

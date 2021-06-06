@@ -1,228 +1,44 @@
 #include <jni.h>
 #include <string>
-#include <GLES3/gl3.h>
 #include <android/asset_manager_jni.h>
 #include <android/log.h>
+#include <vuda_runtime.hpp>
 
 #define LOG_TAG "ndk-build"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
-GLint g_programObject;
-jint g_width;
-jint g_height;
-
-AAssetManager *g_pAssetManager = NULL;
-
-char *readShaderSrcFile(char *shaderFile, AAssetManager *pAssetManager) {
-    AAsset *pAsset = NULL;
-    char *pBuffer = NULL;
-    off_t size = -1;
-    int numByte = -1;
-
-    if (NULL == pAssetManager) {
-        LOGE("pAssetManager is null!");
-        return NULL;
-    }
-    pAsset = AAssetManager_open(pAssetManager, shaderFile, AASSET_MODE_UNKNOWN);
-    //LOGI("after AAssetManager_open");
-
-    size = AAsset_getLength(pAsset);
-    LOGI("after AAssetManager_open");
-    pBuffer = (char *) malloc(size + 1);
-    pBuffer[size] = '\0';
-
-    AAsset_read(pAsset, pBuffer, size);
-    LOGI("%s : [%s]", shaderFile, pBuffer);
-    AAsset_close(pAsset);
-
-    return pBuffer;
-}
-
-
-GLuint LoadShader(GLenum type, const char *shaderSrc) {
-    GLuint shader;
-    GLint compiled;
-
-    // Create the shader object
-    shader = glCreateShader(type);
-
-    if (shader == 0) {
-        return 0;
-    }
-
-    // Load the shader source
-    glShaderSource(shader, 1, &shaderSrc, NULL);
-
-    // Compile the shader
-    glCompileShader(shader);
-
-    // Check the compile status
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
-
-    if (!compiled) {
-        GLint infoLen = 0;
-
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
-
-        if (infoLen > 1) {
-            char *infoLog = (char *) malloc(sizeof(char) * infoLen);
-
-            glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
-            LOGE("Error compiling shader:[%s]", infoLog);
-
-            free(infoLog);
-        }
-
-        glDeleteShader(shader);
-        return 0;
-    }
-
-    return shader;
-
-}
-
-//*********************************************************************************
-extern "C" JNIEXPORT void JNICALL
-Java_com_example_myapplication_RendererJNI_glesInit
-        (JNIEnv *pEnv, jobject obj) {
-    char vShaderStr[] =
-            "#version 300 es                          \n"
-            "layout(location = 0) in vec4 vPosition;  \n"
-            "void main()                              \n"
-            "{                                        \n"
-            "   gl_Position = vPosition;              \n"
-            "}                                        \n";
-
-    char fShaderStr[] =
-            "#version 300 es                              \n"
-            "precision mediump float;                     \n"
-            "out vec4 fragColor;                          \n"
-            "void main()                                  \n"
-            "{                                            \n"
-            "   fragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );  \n"
-            "}                                            \n";
-
-    GLuint vertexShader;
-    GLuint fragmentShader;
-    GLuint programObject;
-    GLint linked;
-
-    // Load the vertex/fragment shaders
-    vertexShader = LoadShader ( GL_VERTEX_SHADER, vShaderStr );
-    fragmentShader = LoadShader ( GL_FRAGMENT_SHADER, fShaderStr );
-
-    // Create the program object
-    programObject = glCreateProgram();
-
-    if (programObject == 0) {
-        return;
-    }
-
-    glAttachShader(programObject, vertexShader);
-    glAttachShader(programObject, fragmentShader);
-
-    // Link the program
-    glLinkProgram(programObject);
-
-    // Check the link status
-    glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
-
-    if (!linked) {
-        GLint infoLen = 0;
-
-        glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
-
-        if (infoLen > 1) {
-            char *infoLog = (char *) malloc(sizeof(char) * infoLen);
-
-            glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
-            LOGE("Error linking program:[%s]", infoLog);
-
-            free(infoLog);
-        }
-
-        glDeleteProgram(programObject);
-        return;
-    }
-
-    // Store the program object
-    g_programObject = programObject;
-
-    glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-}
-
-/*
- * Class:     opengl_panjq_com_opengl_demo_RendererJNI
- * Method:    glesRender
- * Signature: ()V
- */
-extern "C" JNIEXPORT void JNICALL
-Java_com_example_myapplication_RendererJNI_glesRender
-        (JNIEnv *pEnv, jobject obj) {
-    GLfloat vVertices[] = {0.0f, 0.5f, 0.0f,
-                           -0.5f, -0.5f, 0.0f,
-                           0.5f, -0.5f, 0.0f
-    };
-
-    // Set the viewport
-    glViewport(0, 0, g_width, g_height);
-
-    // Clear the color buffer
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    // Use the program object
-    glUseProgram(g_programObject);
-
-    // Load the vertex data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vVertices);
-    glEnableVertexAttribArray(0);
-
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-}
-
-/*
- * Class:     opengl_panjq_com_opengl_demo_RendererJNI
- * Method:    glesResize
- * Signature: (II)V
- */
-extern "C" JNIEXPORT void JNICALL
-Java_com_example_myapplication_RendererJNI_glesResize
-        (JNIEnv *pEnv, jobject obj, jint width, jint height) {
-    g_width = width;
-    g_height = height;
-
-}
-
-extern "C" JNIEXPORT void JNICALL
-Java_com_example_myapplication_RendererJNI_readShaderFile(
-        JNIEnv *env, jobject /* this */, jobject assetManager) {
-    if (assetManager && env) {
-        //LOGI("before AAssetManager_fromJava");
-        g_pAssetManager = AAssetManager_fromJava(env, assetManager);
-        //LOGI("after AAssetManager_fromJava");
-        if (NULL == g_pAssetManager) {
-            LOGE("AAssetManager_fromJava() return null !");
-        }
-    } else {
-        LOGE("assetManager is null !");
-    }
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_example_myapplication_MainActivity_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-
-    char buff[100];
-    snprintf(buff, sizeof(buff), "Platform: %d", 2);
-    std::string buffAsStdStr = buff;
-
-    return env->NewStringUTF(buffAsStdStr.c_str());
-}
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_example_myapplication_RendererJNI_foo(JNIEnv *env, jobject /* this */) {
-    LOGI("HI from foo");
+Java_com_example_myapplication_MainActivity_foo(JNIEnv *env, jobject /* this */) {
+    // assign a device to the thread
+    cudaSetDevice(0);
+    // allocate memory on the device
+    const int N = 5000;
+    int a[N], b[N], c[N];
+    for (int i = 0; i < N; ++i) {
+        a[i] = -i;
+        b[i] = i * i;
+    }
+    int *dev_a, *dev_b, *dev_c;
+    cudaMalloc((void **) &dev_a, N * sizeof(int));
+    cudaMalloc((void **) &dev_b, N * sizeof(int));
+    cudaMalloc((void **) &dev_c, N * sizeof(int));
+    // copy the arrays a and b to the device
+    cudaMemcpy(dev_a, a, N * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(dev_b, b, N * sizeof(int), cudaMemcpyHostToDevice);
+    // run kernel (vulkan shader module)
+    const int blocks = 128;
+    const int threads = 128;
+    const int stream_id = 0;
+    vuda::launchKernel("add.spv", "main", stream_id, blocks, threads, dev_a, dev_b, dev_c, N);
+    // copy result to host
+    cudaMemcpy(c, dev_c, N * sizeof(int), cudaMemcpyDeviceToHost);
+
+    // do something useful with the result in array c ...
+
+    // free memory on device
+    cudaFree(dev_a);
+    cudaFree(dev_b);
+    cudaFree(dev_c);
 }
