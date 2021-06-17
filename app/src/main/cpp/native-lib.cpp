@@ -31,12 +31,14 @@ Java_com_example_myapplication_MainActivity_foo(JNIEnv *env, jobject /* this */)
     const int blocks = 128;
     const int threads = 128;
     const int stream_id = 0;
-    vuda::launchKernel("add.spv", "main", stream_id, blocks, threads, dev_a, dev_b, dev_c, N);
+    vuda::launchKernel("/storage/emulated/0/Android/data/com.example.myapplication/files/add.spv", "main", stream_id, blocks, threads, dev_a, dev_b, dev_c, N);
     // copy result to host
     cudaMemcpy(c, dev_c, N * sizeof(int), cudaMemcpyDeviceToHost);
 
     // do something useful with the result in array c ...
-
+    for (int i=0; i<N; i++) {
+        LOGI("%d ", c[i]);
+    }
     // free memory on device
     cudaFree(dev_a);
     cudaFree(dev_b);

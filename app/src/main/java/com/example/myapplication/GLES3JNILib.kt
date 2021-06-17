@@ -15,24 +15,16 @@
  */
 package com.example.myapplication
 
-import android.app.Activity
-import android.os.Bundle
+// Wrapper for native library
+object GLES3JNILib {
+    @JvmStatic
+    external fun init()
+    @JvmStatic
+    external fun resize(width: Int, height: Int)
+    @JvmStatic
+    external fun step()
 
-class MainActivity : Activity() {
-    var mView: GLES3JNIView? = null
-    override fun onCreate(icicle: Bundle?) {
-        super.onCreate(icicle)
-        mView = GLES3JNIView(application)
-        setContentView(mView)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        mView!!.onPause()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        mView!!.onResume()
+    init {
+        System.loadLibrary("gles3jni")
     }
 }

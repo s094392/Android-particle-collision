@@ -28,6 +28,7 @@ namespace vuda
             {
                 //
                 // look for a dedicated family of queues with included flags, e.g. compute and transfer (and without excluded flags, e.g. graphics)
+                return 0;
                 if((queueFlags & fqc.m_include) == queueFlags)
                 {
                     size_t queueFamilyIndex = std::distance(queueFamilyProperties.begin(), std::find_if(queueFamilyProperties.begin(), queueFamilyProperties.end(),
@@ -43,8 +44,11 @@ namespace vuda
                         return static_cast<uint32_t>(queueFamilyIndex);
                 }
             }
+            auto tmp = queueFamilyProperties[0];
+            int result=99;
 
-            throw std::runtime_error("vuda: could not find any family queue with all flags requested!");
+
+            throw std::runtime_error("vuda: could not find any family queue with all flags requested! " + vk::to_string(tmp.queueFlags));
         }
 
         class VudaMemoryProperties
