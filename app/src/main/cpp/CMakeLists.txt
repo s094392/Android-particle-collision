@@ -23,6 +23,17 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         native-lib.cpp)
 
+add_library( # Sets the name of the library.
+        gles3jni
+
+        # Sets the library as a shared library.
+        SHARED
+
+        # Provides a relative path to your source file(s).
+        gles3jni.cpp
+        RendererES3.cpp
+        )
+
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
@@ -42,6 +53,26 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
         native-lib
         vulkan_lib
+        opencl_lib
+        cutils_lib
+        cpp_lib
+        base_lib
+        GLESv3
+
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib} android)
+
+
+target_link_libraries( # Specifies the target library.
+        gles3jni
+        opencl_lib
+        cutils_lib
+        cpp_lib
+        base_lib
+        GLESv3
+        EGL
+
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib} android)
