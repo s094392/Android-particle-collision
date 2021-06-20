@@ -116,7 +116,7 @@ protected:
     float dy[10000];
     float new_dx[10000];
     float new_dy[10000];
-    int n = 100;
+    int n = 3000;
 
 private:
 //    void calcSceneParams(unsigned int w, unsigned int h, float* offsets);

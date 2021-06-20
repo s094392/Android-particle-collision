@@ -17,6 +17,7 @@ package com.example.myapplication
 
 import android.content.Context
 import android.opengl.GLSurfaceView
+import com.example.myapplication.GLES3JNILib.foo
 import com.example.myapplication.GLES3JNILib.init
 import com.example.myapplication.GLES3JNILib.resize
 import com.example.myapplication.GLES3JNILib.step
@@ -27,6 +28,7 @@ class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
     private class Renderer : GLSurfaceView.Renderer {
         override fun onDrawFrame(gl: GL10) {
             step()
+//            foo()
         }
 
         override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {

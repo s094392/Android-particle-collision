@@ -23,6 +23,8 @@ object GLES3JNILib {
     external fun resize(width: Int, height: Int)
     @JvmStatic
     external fun step()
+    @JvmStatic
+    external fun foo()
 
     init {
         System.loadLibrary("gles3jni")

@@ -68,6 +68,7 @@ target_link_libraries( # Specifies the target library.
         gles3jni
         opencl_lib
         cutils_lib
+        vulkan_lib
         cpp_lib
         base_lib
         GLESv3
