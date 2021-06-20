@@ -17,7 +17,7 @@ package com.example.myapplication
 
 import android.content.Context
 import android.opengl.GLSurfaceView
-import com.example.myapplication.GLES3JNILib.foo
+import android.util.Log
 import com.example.myapplication.GLES3JNILib.init
 import com.example.myapplication.GLES3JNILib.resize
 import com.example.myapplication.GLES3JNILib.step
@@ -28,6 +28,7 @@ class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
     private class Renderer : GLSurfaceView.Renderer {
         override fun onDrawFrame(gl: GL10) {
             step()
+            counter.logFrame()
 //            foo()
         }
 
@@ -38,6 +39,8 @@ class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
         override fun onSurfaceCreated(gl: GL10, config: EGLConfig) {
             init()
         }
+
+        private var counter = FPSCounter()
     }
 
     companion object {
@@ -51,5 +54,19 @@ class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
         setEGLConfigChooser(8, 8, 8, 0, 16, 0)
         setEGLContextClientVersion(3)
         setRenderer(Renderer())
+    }
+}
+
+
+class FPSCounter {
+    var startTime = System.nanoTime()
+    var frames = 0
+    fun logFrame() {
+        frames++
+        if (System.nanoTime() - startTime >= 1000000000) {
+            Log.d("FPSCounter", "fps: $frames")
+            frames = 0
+            startTime = System.nanoTime()
+        }
     }
 }
