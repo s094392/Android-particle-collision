@@ -22,8 +22,6 @@
 
 #define POS_ATTRIB 0
 #define COLOR_ATTRIB 1
-// #define SCALEROT_ATTRIB 2
-// #define OFFSET_ATTRIB 3
 #define OFFSET_ATTRIB 2
 
 static const char VERTEX_SHADER[] =
