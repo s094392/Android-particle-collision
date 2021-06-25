@@ -22,7 +22,7 @@ class MainActivity : Activity() {
     var mView: GLES3JNIView? = null
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
-        mView = GLES3JNIView(application)
+        mView = GLES3JNIView(application, 1000, true)
         setContentView(mView)
     }
 

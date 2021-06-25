@@ -24,12 +24,11 @@ import com.example.myapplication.GLES3JNILib.step
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
-    private class Renderer : GLSurfaceView.Renderer {
+class GLES3JNIView(context: Context?, number: Int, use_vuda: Boolean) : GLSurfaceView(context) {
+    private class Renderer(number: Int, use_vuda: Boolean) : GLSurfaceView.Renderer {
         override fun onDrawFrame(gl: GL10) {
-            step()
+            step(use_vuda)
             counter.logFrame()
-//            foo()
         }
 
         override fun onSurfaceChanged(gl: GL10, width: Int, height: Int) {
@@ -37,9 +36,11 @@ class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
         }
 
         override fun onSurfaceCreated(gl: GL10, config: EGLConfig) {
-            init()
+            init(number)
         }
 
+        private var use_vuda = use_vuda
+        private var number = number
         private var counter = FPSCounter()
     }
 
@@ -53,7 +54,7 @@ class GLES3JNIView(context: Context?) : GLSurfaceView(context) {
         // supporting OpenGL ES 2.0 or later backwards-compatible versions.
         setEGLConfigChooser(8, 8, 8, 0, 16, 0)
         setEGLContextClientVersion(3)
-        setRenderer(Renderer())
+        setRenderer(Renderer(number, use_vuda))
     }
 }
 

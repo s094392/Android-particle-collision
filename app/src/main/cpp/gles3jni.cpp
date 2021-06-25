@@ -15,14 +15,15 @@
  */
 
 #include <jni.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 #include "gles3jni.h"
+#include "cal.h"
 #include <GLES3/gl3.h>
 #include <vuda_runtime.hpp>
 
-#define LOG_TAG "ndk-build"
+
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
@@ -175,7 +176,6 @@ void Renderer::resize(int w, int h) {
     unmapOffsetBuf();
 
 
-
     mLastFrameNs = 0;
 
     glViewport(0, 0, w, h);
@@ -188,15 +188,14 @@ float Renderer::distance2(int i, int j) {
     return (x[i] - x[j]) * (x[i] - x[j]) + (y[i] - y[j]) * (y[i] - y[j]);
 }
 
-void Renderer::step() {
+void Renderer::step(bool use_vuda) {
     timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
     auto nowNs = now.tv_sec * 1000000000ull + now.tv_nsec;
 
     if (mLastFrameNs > 0) {
         float dt = float(nowNs - mLastFrameNs) * 0.0000005f;
-        bool vudagogogo = true;
-        if (vudagogogo) {
+        if (use_vuda) {
             cudaSetDevice(0);
             float *dev_x, *dev_y, *dev_dx, *dev_dy, *dev_new_dx, *dev_new_dy;
             cudaMalloc((void **) &dev_x, n * sizeof(float));
@@ -213,11 +212,13 @@ void Renderer::step() {
             cudaMemcpy(dev_new_dx, new_dx, n * sizeof(float), cudaMemcpyHostToDevice);
             cudaMemcpy(dev_new_dy, new_dy, n * sizeof(float), cudaMemcpyHostToDevice);
 
-            const int blocks = 100;
-            const int threads = 30;
+            const int blocks = 50;
+            const int threads = 20;
             const int stream_id = 0;
+            std::string filename = "/storage/emulated/0/Android/data/com.example.myapplication/files/add.spv";
             vuda::launchKernel(
-                    "/storage/emulated/0/Android/data/com.example.myapplication/files/add.spv",
+//                    filename,
+                    kernel_spv,
                     "main", stream_id, blocks, threads, dev_x, dev_y, dev_dx, dev_dy, dev_new_dx,
                     dev_new_dy, n);
 
@@ -269,33 +270,13 @@ void Renderer::step() {
             offsets[2 * i + 1] = y[i] * yScale;
         }
         unmapOffsetBuf();
-
-//        for (unsigned int i = 0; i < mNumInstances; i++) {
-//            mAngles[i] += mAngularVelocity[i] * dt;
-//            if (mAngles[i] >= TWO_PI) {
-//                mAngles[i] -= TWO_PI;
-//            } else if (mAngles[i] <= -TWO_PI) {
-//                mAngles[i] += TWO_PI;
-//            }
-//        }
-
-//        float* transforms = mapTransformBuf();
-//        for (unsigned int i = 0; i < mNumInstances; i++) {
-//            float s = sinf(mAngles[i]);
-//            float c = cosf(mAngles[i]);
-//            transforms[4*i + 0] =  c * mScale[0];
-//            transforms[4*i + 1] =  s * mScale[1];
-//            transforms[4*i + 2] = -s * mScale[0];
-//            transforms[4*i + 3] =  c * mScale[1];
-//        }
-//        unmapTransformBuf();
     }
 
     mLastFrameNs = nowNs;
 }
 
-void Renderer::render() {
-    step();
+void Renderer::render(bool use_vuda) {
+    step(use_vuda);
 
     glClearColor(0.2f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -323,7 +304,7 @@ static GLboolean gl3stubInit() {
 #endif
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_myapplication_GLES3JNILib_init(JNIEnv *env, jclass obj) {
+Java_com_example_myapplication_GLES3JNILib_init(JNIEnv *env, jclass obj, jint number) {
     if (g_renderer) {
         delete g_renderer;
         g_renderer = NULL;
@@ -337,6 +318,7 @@ Java_com_example_myapplication_GLES3JNILib_init(JNIEnv *env, jclass obj) {
     const char *versionStr = (const char *) glGetString(GL_VERSION);
     if (strstr(versionStr, "OpenGL ES 3.") && gl3stubInit()) {
         g_renderer = createES3Renderer();
+        g_renderer->n = number;
     } else {
         ALOGE("Unsupported OpenGL ES version");
     }
@@ -351,8 +333,8 @@ Java_com_example_myapplication_GLES3JNILib_resize(JNIEnv *env, jclass obj, jint 
 }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_example_myapplication_GLES3JNILib_step(JNIEnv *env, jclass obj) {
+Java_com_example_myapplication_GLES3JNILib_step(JNIEnv *env, jclass obj, jboolean use_vuda) {
     if (g_renderer) {
-        g_renderer->render();
+        g_renderer->render(use_vuda);
     }
 }

@@ -17,6 +17,7 @@
 #ifndef GLES3JNI_H
 #define GLES3JNI_H 1
 
+#define LOG_TAG "ndk-build"
 #include <android/log.h>
 #include <math.h>
 
@@ -36,7 +37,6 @@
 
 #define DEBUG 1
 
-#define LOG_TAG "GLES3JNI"
 #define ALOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #if DEBUG
 #define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__)
@@ -84,7 +84,8 @@ class Renderer {
 public:
     virtual ~Renderer();
     void resize(int w, int h);
-    void render();
+    void render(bool use_vuda);
+    int n = 1000;
 
 protected:
     Renderer();
@@ -116,19 +117,11 @@ protected:
     float dy[10000];
     float new_dx[10000];
     float new_dy[10000];
-    int n = 3000;
 
 private:
-//    void calcSceneParams(unsigned int w, unsigned int h, float* offsets);
-    void step();
+    void step(bool use_vuda);
     float distance2(int, int);
-
-
-    // unsigned int mNumInstances;
-    // float mScale[2];
-    // float mAngularVelocity[MAX_INSTANCES];
     uint64_t mLastFrameNs;
-    // float mAngles[MAX_INSTANCES];
 };
 
 extern Renderer* createES3Renderer();

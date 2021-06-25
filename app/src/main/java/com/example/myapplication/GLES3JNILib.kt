@@ -18,13 +18,11 @@ package com.example.myapplication
 // Wrapper for native library
 object GLES3JNILib {
     @JvmStatic
-    external fun init()
+    external fun init(number: Int)
     @JvmStatic
     external fun resize(width: Int, height: Int)
     @JvmStatic
-    external fun step()
-    @JvmStatic
-    external fun foo()
+    external fun step(use_vuda: Boolean)
 
     init {
         System.loadLibrary("gles3jni")
