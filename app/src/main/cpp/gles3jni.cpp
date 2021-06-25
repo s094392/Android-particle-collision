@@ -212,8 +212,8 @@ void Renderer::step(bool use_vuda) {
             cudaMemcpy(dev_new_dx, new_dx, n * sizeof(float), cudaMemcpyHostToDevice);
             cudaMemcpy(dev_new_dy, new_dy, n * sizeof(float), cudaMemcpyHostToDevice);
 
-            const int blocks = 50;
-            const int threads = 20;
+            const int blocks = 128;
+            const int threads = (n + blocks - 1) / blocks;
             const int stream_id = 0;
             std::string filename = "/storage/emulated/0/Android/data/com.example.myapplication/files/add.spv";
             vuda::launchKernel(

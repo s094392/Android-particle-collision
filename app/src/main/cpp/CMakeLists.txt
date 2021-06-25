@@ -78,7 +78,7 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib} android)
 
-include_directories(${CMAKE_SOURCE_DIR}/include/)
+include_directories(${CMAKE_SOURCE_DIR}/includes/)
 add_library(opencl_lib STATIC IMPORTED)
 set_target_properties(opencl_lib PROPERTIES
         IMPORTED_LOCATION
