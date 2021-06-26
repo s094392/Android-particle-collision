@@ -1,9 +1,16 @@
 # Android OpenGL and Vulkan particle collision example
-A OpenGL particle collision  example with parallel computation using [vuda](https://github.com/jgbit/vuda), which reduce the time complexity to O(n).
+A OpenGL particle collision  example with parallel computation using [vuda](https://github.com/jgbit/vuda), which reduces the time complexity to O(n).
 This my course final project with [Tracy Liu](https://github.com/tracyliu1220).
+
+<img src="https://github.com/s094392/Android-particle-collision/blob/main/media/Overview.png" width="80%">
 
 ## Particle collision
 By [Tracy Liu](https://github.com/tracyliu1220), Reference: [https://github.com/tracyliu1220/2021-GPU-Final](https://github.com/tracyliu1220/2021-GPU-Final)
+
+## Screenshot
+It may only work on Google Pixel 4.
+
+<img src="https://github.com/s094392/Android-particle-collision/blob/main/media/image1.png" width="20%"> <img src="https://github.com/s094392/Android-particle-collision/blob/main/media/image2.png" width="20%">
 
 ## Expermiment result
 * Device: Pixel 4
